@@ -34,7 +34,7 @@ var statementPatterns = [
 	[/^if\s+(.+?)\s+then\s+(.+?)(\s+else\s+(.+?))?$/i, function (context) {
 		var condition = this.matches[1];
 		var statement = this.matches[2];		
-		var otherwise = this.matches[4];
+		var otherwise = this.matches[3];
 		if (context.evaluate(condition)) {
 			var s = new Statement(statement);
 			s.execute(context);
