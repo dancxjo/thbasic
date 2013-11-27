@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="basic.js"></script>
+	</head>
+	<body>
+		<textarea id="program" cols="80" rows="25">10 CLS
+30 FOR I# = 99 TO 1 STEP -1
+40 PRINT I#, " bottle",
+50 IF I# > 1 THEN PRINT "s",
+60 PRINT " of beer on the wall."
+62 PRINT I#, " bottle",
+63 IF I# > 1 THEN PRINT "s",
+64 PRINT " of beer."
+80 PRINT "Take one down. Pass it around."
+85 IF I# - 1 = 0 THEN PRINT "No more", ELSE PRINT I# - 1
+90 PRINT " bottle",
+100 IF I# - 1 <> 1 THEN PRINT "s",
+105 PRINT " of beer on the wall!"
+110 NEXT I#</textarea>
+		<input type="submit" value="Execute" onclick="execute();"/>
+		<pre id="output"></pre>
+		<script>
+			function execute() {
+				var program = new Program(document.getElementById('program').value);
+				program.execute(document.getElementById("output"));
+			}
+		</script>
+	</body>
+</html>
