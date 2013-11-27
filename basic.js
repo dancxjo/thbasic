@@ -1,19 +1,15 @@
 var statementPatterns = [
 	[/^cls$/i, function (context) {
-		context.output.innerHTML = "";
+		context.clear();
 	}],
 	[/^if\s+(.+?)\s+then\s+(.+?)(\s+else\s+(.+?))?$/i, function (context) {
-		console.log("IF statement");
 		var condition = this.matches[1];
 		var statement = this.matches[2];		
 		var otherwise = this.matches[3];
 		if (context.evaluate(condition)) {
-			console.log("TRUE " + condition);
 			var s = new Statement(statement);
-			console.log(s);
 			s.execute(context);
 		} else {
-			console.log("FALSE " + condition);
 			if (otherwise) {
 				var s = new Statement(otherwise);
 				s.execute(context);
@@ -31,14 +27,12 @@ var statementPatterns = [
 				step = context.evaluate(this.matches[5]);
 			context.variables[variable] = start;
 			context.loops[variable] = {headLine: context.ln, start: start, end: end, step: step};
-			console.log("Starting loop");
 		} else {
 			// Sanity check
 			if (context.loops[variable].headLine != context.ln) {
 				throw "FOR loop nested inside FOR loop on same variable on line " + context.ln;
 			} else {
 				// Continue the loop
-				console.log("Continuing loop");
 				context.variables[variable] += context.loops[variable].step;
 			}
 		}
@@ -52,16 +46,16 @@ var statementPatterns = [
 			var val = context.evaluate(variable);
 			if (!(loop.start <= loop.end && val >= loop.end) && !(val <= loop.end)) {
 				// return to for line
-				console.log("Returning to " + loop.headLine);
 				context.ln = loop.headLine;
 			}			
 		}
 	}],
 	[/^goto\s+(.+)$/i, function (context) {
-		console.log("Going to line " + this.matches[1]);
+		context.callstack.push(context.ln);
 		context.ln = context.evaluate(this.matches[1]);
 	}],
 	[/^print\s+(.*?)(,)?$/i, function (context) {
+		// TODO: Don't split literal strings
 		var params = this.matches[1].split(",");
 		for (var i in params) {
 			var param = params[i].trim();			
@@ -71,9 +65,14 @@ var statementPatterns = [
 			context.output.innerHTML += "\n";
 		}
 	}],
+	[/^input\s+(.+?),\s*(.+?)$/i, function (context) {
+		var variable = this.matches[2];
+		var input = prompt(context.evaluate(this.matches[1]));
+		context.setVar(variable, input); 
+	}
+	}],
 	[/^(let\s+)?(.+?)\s*=\s*(.+?)$/i, function (context) {
-		context.variables[this.matches[2]] = context.evaluate(this.matches[3]);
-		console.log(context.variables);
+		context.setVar(this.matches[2], context.evaluate(this.matches[3]));
 	}],
 ];
 
@@ -103,9 +102,36 @@ function Program(text) {
 	this.lines = [];
 	this.variables = [];
 	this.loops = [];
+	this.callstack = [];
 	if (text) {
 		this.parse(text);
 	}
+}
+
+Program.prototype.clear = function () {
+	this.output.innerHTML = "";
+}
+
+Program.prototype.print = function (stuff) {
+	this.output.innerHTML += stuff;
+}
+
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+Program.prototype.setVar = function (variable, value) {
+	if (variable.indexOf("#")) {
+		if (!isNumber(value)) {
+			throw "Type mismatch on line " + this.ln;
+		}
+	} else {
+		if (isNumber(value)) {
+			throw "Type mismatch on line " + this.ln;
+		}
+	}
+	
+	this.variables[variable] = value;
 }
 
 Program.prototype.parse = function (text) {
