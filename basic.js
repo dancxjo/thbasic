@@ -69,7 +69,6 @@ var statementPatterns = [
 		var variable = this.matches[2];
 		var input = prompt(context.evaluate(this.matches[1]));
 		context.setVar(variable, input); 
-	}
 	}],
 	[/^(let\s+)?(.+?)\s*=\s*(.+?)$/i, function (context) {
 		context.setVar(this.matches[2], context.evaluate(this.matches[3]));
