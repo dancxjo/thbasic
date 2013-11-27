@@ -76,7 +76,7 @@ var statementPatterns = [
 		} else {
 			var loop = context.loops[variable];
 			var val = context.evaluate(variable);
-			if ((loop.step > 0 && val <= loop.end) || (val >= loop.end)) {
+			if ((loop.step > 0 && val < loop.end) || (val > loop.end)) {
 				context.ln = loop.headLine;
 			}
 		}
@@ -210,30 +210,50 @@ Program.prototype.getCurrentLine = function () {
 Program.prototype.evaluate = function (expression) {
 	var matches;
 	if (matches = expression.match(/^[A-Z_][A-Z_0-9]*[$%!#]?$/i)) {
+		console.log("Variable " + expression);
 		return this.variables[expression];
 	} else if (matches = expression.match(/^"(.*?)"$/i)) {
+		console.log("String literal " + expression);
 		return matches[1];
-	} else if (matches = expression.match(/^(.+?)\s*\/\s*(.+?)$/i)) {
-		return this.evaluate(matches[1]) / this.evaluate(matches[2]);
-	} else if (matches = expression.match(/^(.+?)\s*\*\s*(.+?)$/i)) {
-		return this.evaluate(matches[1]) * this.evaluate(matches[2]);
-	} else if (matches = expression.match(/^(.+?)\s*\-\s*(.+?)$/i)) {
-		return this.evaluate(matches[1]) - this.evaluate(matches[2]);
-	} else if (matches = expression.match(/^(.+?)\s*\+\s*(.+?)$/i)) {
-		return this.evaluate(matches[1]) + this.evaluate(matches[2]);
+	} else if (matches = expression.match(/^(.+?)\s*AND\s*(.+?)$/i)) {
+		console.log("AND " + expression);
+		return this.evaluate(matches[1]) && this.evaluate(matches[2]);
+	} else if (matches = expression.match(/^(.+?)\s*OR\s*(.+?)$/i)) {
+		console.log("OR " + expression);
+		return this.evaluate(matches[1]) || this.evaluate(matches[2]);
 	} else if (matches = expression.match(/^(.+?)\s*\=\s*(.+?)$/i)) {
+		console.log("== " + expression);
 		return this.evaluate(matches[1]) == this.evaluate(matches[2]);
 	} else if (matches = expression.match(/^(.+?)\s*\>\s*(.+?)$/i)) {
+		console.log("> " + expression);
 		return this.evaluate(matches[1]) > this.evaluate(matches[2]);
 	} else if (matches = expression.match(/^(.+?)\s*\<\s*(.+?)$/i)) {
+		console.log("< " + expression);
 		return this.evaluate(matches[1]) < this.evaluate(matches[2]);
 	} else if (matches = expression.match(/^(.+?)\s*\>=\s*(.+?)$/i)) {
+		console.log(">= " + expression);
 		return this.evaluate(matches[1]) >= this.evaluate(matches[2]);
 	} else if (matches = expression.match(/^(.+?)\s*\<=\s*(.+?)$/i)) {
+		console.log("<= " + expression);
 		return this.evaluate(matches[1]) <= this.evaluate(matches[2]);
 	} else if (matches = expression.match(/^(.+?)\s*\<>\s*(.+?)$/i)) {
+		console.log("!= " + expression);
 		return this.evaluate(matches[1]) != this.evaluate(matches[2]);
-	}
+	} else if (matches = expression.match(/^(.+?)\s*\/\s*(.+?)$/i)) {
+		console.log("/ " + expression);
+		return this.evaluate(matches[1]) / this.evaluate(matches[2]);
+	} else if (matches = expression.match(/^(.+?)\s*\*\s*(.+?)$/i)) {
+		console.log("* " + expression);
+		return this.evaluate(matches[1]) * this.evaluate(matches[2]);
+	} else if (matches = expression.match(/^(.+?)\s*\-\s*(.+?)$/i)) {
+		console.log("- " + expression);
+		return this.evaluate(matches[1]) - this.evaluate(matches[2]);
+	} else if (matches = expression.match(/^(.+?)\s*\+\s*(.+?)$/i)) {
+		console.log("+ " + expression);
+		return this.evaluate(matches[1]) + this.evaluate(matches[2]);
+	} else if (matches = expression.match(/^"(.+?)"$/)) {
+		return matches[1];
+	} 
 	
 	return Number(expression);
 }
